@@ -28,7 +28,7 @@ def optimize(planes, boxes, output=False):
         m.addConstr( quicksum( l[(i,j)] for j in range(numP)) == 1, name="c1_%d" % i)
 
     for j in range(numP):
-        m.addConstr( quicksum( l[(i,j)]*boxes[i] for i in range(numB)) <= maxweight, name="c2_%d" % i)
+        m.addConstr( quicksum( l[(i,j)]*boxes[i] for i in range(numB)) <= maxweight, name="c2_%d" % j)
 
     m.setObjective(maxweight, GRB.MINIMIZE)
 
@@ -42,6 +42,8 @@ def optimize(planes, boxes, output=False):
             if l[(i,j)].X > .5:
                 row.append(i)
         solution.append(row)
+
+    print solution
 
     return solution
 

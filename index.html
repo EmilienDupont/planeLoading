@@ -153,6 +153,9 @@ aside {
       <div id="demoarea">
       </div>
       <button class="pure-button" onclick="compute()">Compute</button>
+      <div>Icons made by <a href="http://www.flaticon.com/authors/google" title="Google">Google</a>
+      from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>
+      is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a></div>
     </div>
 
     <div style="min-height:100px"></div>
@@ -180,11 +183,17 @@ var svg = d3.select("#demoarea")
               .attr("height", height);
 
 // Data for problem
-var box = [0,0,0,0]
-var planes = [100,100,100]
+var box = [17,21,5,4];
+var planes = [100,100,100];
+var boxWeights = [1,2,3,6]; // in tonnes
+var boxes = [];
+var boxScale = 3.8;
 
 // G object for background
 backgroundG = svg.append("g");
+
+// G object for planes
+planesG = svg.append("g");
 
 // G objects for menu
 menuG = svg.append("g");
@@ -197,12 +206,34 @@ buttonsMinusG = svg.append("g");
 // G object for buttontext
 buttontxtG = svg.append("g");
 
+// G object for storage box
+storageG = svg.append("g");
+
+// G object for different planes
+plane0G = svg.append("g");
+plane1G = svg.append("g");
+plane2G = svg.append("g");
+var planesG = [plane0G, plane1G, plane2G];
+
+// Create background
 backgroundG.append("rect")
            .attr("x", 0).attr("y", 0)
            .attr("width", width).attr("height", height)
            .attr("fill", "rgb(255,250,205)");
 
-// Create menu and background
+var planeGraphics = [[0, .65*height], [.19*width, .8*height], [.38*width, .95*height]];
+/*
+planesG.selectAll("path")
+          .data(planeGraphics)
+          .enter()
+          .append("path")
+          .attr("d", "M510,255c0-20.4-17.85-38.25-38.25-38.25H331.5L204,12.75h-51l63.75,204H76.5l-38.25-51H0L25.5,255L0,344.25h38.25    l38.25-51h140.25l-63.75,204h51l127.5-204h140.25C492.15,293.25,510,275.4,510,255z")
+          .attr("transform", function(d) { return "translate(" + d[0] + "," + d[1] + ") rotate(-90) scale(.6)"; })
+          .attr("fill", "white")
+          .attr("stroke", "black")
+          .attr("opacity", .5); */
+
+// Create menu
 menu = [];
 menuNum = 4;
 menuPad = 100;
@@ -299,6 +330,21 @@ buttonsMinusG.selectAll("text")
 
 redraw();
 
+var storage = [[.1*width, .2*height], [.3*width, .2*height], [.5*width, .2*height]]
+var storageW = .15*width;
+var storageH = .6*height;
+
+// Create storage rectangles
+storageG.selectAll("rect")
+        .data(storage)
+        .enter()
+        .append("rect")
+        .attr("x", function (d) { return d[0]; })
+        .attr("y", function (d) { return d[1]; })
+        .attr("height", storageH)
+        .attr("width", storageW)
+        .attr("opacity", .3);
+
 function addBox() {
   var id = parseInt(d3.select(this).attr("id"));
   box[id] += 1;
@@ -330,11 +376,18 @@ function redraw() {
 }
 
 function compute() {
-  params = [a1, a2, b1, b2, c1, c2, d1, d2, nData];
-  console.log(params);
-  d3.json('/piecewiseLinear')
+  boxes = [];
+  for (var j = 0; j < 4; j++) {
+    for (var i = 0; i < box[j]; i++) {
+      boxes.push(boxWeights[j]);
+    }
+  }
+
+  console.log('boxes',boxes);
+
+  d3.json('/planeLoading.py')
     .header('Content-Type', 'application/json')
-    .post(JSON.stringify({'params': params}), serverResponse);
+    .post(JSON.stringify({'planes': planes, 'boxes': boxes}), serverResponse);
 }
 
 function serverResponse(error, data) {
@@ -345,12 +398,52 @@ function serverResponse(error, data) {
         // Import solution and put it into correct format
         var solution = data['solution'];
         console.log('solution', solution);
-        var solPoint = [solution, f(a1,a2,b1,b2,c1,c2,d1,d2,solution)];
-        solutionG.selectAll("circle").remove("circle");
-        solutionG.append("circle").attr("cx", xScale(solPoint[0]))
-                                  .attr("cy", yScale(solPoint[1]))
-                                  .attr("r", 5)
-                                  .attr("fill", "red");
+
+        // Calculate total weight in each plane
+        var weight = [0,0,0];
+        for (var i = 0; i < solution.length; i++) {
+          for (var j = 0; j < solution[i].length; j++) {
+            weight[i] = weight[i] + boxes[solution[i][j]];
+          }
+        }
+        console.log('weight', weight);
+
+        for (var j = 0; j < planesG.length; j++) {
+          planesG[j].selectAll("rect").remove("rect");
+          planesG[j].selectAll("rect")
+                 .data(solution[j])
+                 .enter()
+                 .append("rect")
+                 .attr("x", function(d,i) { return storage[j][0] + (i%4 + .5)*storageW/4 - boxScale*boxes[d]/2; })
+                 .attr("y", function(d,i) { return storage[j][1] - Math.floor(i/4)*storageH/10 + .95*storageH - boxScale*boxes[d]/2; })
+                 .attr("height", function(d) { return boxScale*boxes[d];})
+                 .attr("width", function(d) { return boxScale*boxes[d];})
+                 .attr("fill", "rgb(225,202,149)")
+                 .attr("stroke", "rgb(205,182,129)")
+                 .attr("stroke-width", 3)
+                 .attr("opacity", 0)
+                 .transition()
+                 .duration(500)
+                 .delay(function(d, i) { return i*50; })
+                 .attr("opacity", 1);
+
+          planesG[j].append("text")
+                 .attr("x", storage[j][0] + storageW/2)
+                 .attr("y", .85*height)
+                 .text(weight[j]);
+
+          planesG[j].append("text")
+                 .attr("x", storage[j][0] + storageW/2)
+                 .attr("y", .9*height)
+                 .text("Tonnes");
+
+          planesG[j].selectAll("text")
+                 .attr("text-anchor", "middle")
+                 .attr("font-family", "Helvetica Neue")
+                 .attr("font-weight", 800)
+                 .attr("font-size", 20);
+        }
+
     }
   }
 }
