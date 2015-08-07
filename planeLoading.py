@@ -30,9 +30,14 @@ def optimize(planes, boxes, output=False):
     for j in range(numP):
         m.addConstr( quicksum( l[(i,j)]*boxes[i] for i in range(numB)) <= maxweight, name="c2_%d" % j)
 
+    m.addConstr( maxweight <= planes[0], name="maxconstraint" )
+
     m.setObjective(maxweight, GRB.MINIMIZE)
 
     m.optimize()
+
+    if (m.status == 3 or m.status == 4):
+        return ["infeasible"]
 
     solution = []
 
@@ -42,8 +47,6 @@ def optimize(planes, boxes, output=False):
             if l[(i,j)].X > .5:
                 row.append(i)
         solution.append(row)
-
-    print solution
 
     return solution
 
