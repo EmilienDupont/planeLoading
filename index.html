@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script>
+  MathJax.Hub.Config({
+                      tex2jax: {inlineMath: [['$', '$'], ['\\(','\\)']]},
+                      TeX: { equationNumbers: {autoNumber: "AMS"} },
+                      "HTML-CSS": { showMathMenu: false,
+                                    scale: 90 }
+                     });
+</script>
+<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.4.2/pure-min.css">
+<style>
+
+@import url(http://fonts.googleapis.com/css?family=PT+Serif|PT+Serif:b|PT+Serif:i|PT+Sans|PT+Sans:b);
+@import url(http://fonts.googleapis.com/css?family=Lato);
+html {
+   min-width: 1040px;
+}
+
+body {
+   background: #fcfcfa;
+   color: #333;
+   font-family: "PT Serif", serif;
+   /*margin: 0 1em 4em auto;*/
+   position: relative;
+   width: 960px;
+   left: 13em;
+}
+
+h1, h2, h3, h4 { font-family: "Lato", "PT Serif", serif; color: #000; text-rendering: optimizeLegibility; }
+
+h1 {
+  font-size: 64px;
+  line-height: 73px;
+  font-weight: 900;
+  margin-top: 0.67em;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+}
+
+h2 {
+   margin-top: 2em;
+}
+
+subtitle {
+   display:block;
+   font-family: "PT Serif", serif;
+   font-size: 32px;
+   font-style: italic;
+   font-weight: 100;
+}
+
+p {
+  line-height: 150%;
+  width: 720px;
+}
+
+a {
+  color: steelblue;
+  cursor: auto;
+}
+
+a:not(:hover) {
+   text-decoration: none;
+}
+
+pre {
+   border-left: solid 2px #ccc;
+   padding-left: 18px;
+   margin: 2em 0 2em -20px;
+}
+
+aside {
+   font-size: small;
+   right: 0;
+   position: absolute;
+   width: 180px;
+}
+
+#nav {
+        left: 5px;
+        font-family: "Lato", serif;
+        font-weight: 700;
+        list-style: none;
+        margin: 0;
+        position: fixed;
+        top: 10px;
+        box-sizing: border-box;
+}
+
+
+#nav li {
+        margin-bottom: 0px;
+}
+
+#nav a {
+        color: #333;
+        display: block;
+        font-size: 14px;
+        border-left: 3px solid #fcfcfa;
+        padding: 5px 10px;
+        text-decoration: none;
+}
+
+#nav a:hover {
+   border-left: 3px solid steelblue;
+}
+
+#nav .current a {
+   border-left: 3px solid steelblue;
+}
+
+</style>
+<body>
+  <ul id="nav">
+    <li class="current"><a href="#intro">Intro</a></li>
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#model">Model</a></li>
+    <li><a href="#implementation">Implementation</a></li>
+    <li><a href="#demo">Live Demo</a></li>
+  </ul>
+  <div id="container">
+    <div class="section" id="intro">
+      <h1>Cargo Plane Loading</h1>
+        <subtitle>with integer programming and Gurobi</subtitle>
+    </div>
+
+    <div class="section" id="problem">
+      <h2><a href="#problem" name="problem">Problem Description</a></h2>
+      Problem description goes here
+
+    </div>
+    <div class="section" id="model">
+      <h2><a href="#model" name="model">Mathematical Model</a></h2>
+
+      <p>Model description goes here.</p>
+
+    </div>
+    <div class="section" id="implementation">
+      <h2><a href="#implementation" name="implementation">Implementation</a></h2>
+      <p>Below is the full implementation of the model (and the associated data) in
+        Gurobi's Python interface:
+      </p>
+      <pre>
+      Gurobi Code
+      </pre>
+    </div>
+    <div class="section" id="demo">
+      <h2><a href="#demo" name="demo">Live Demo</a></h2>
+      <div id="demoarea">
+      </div>
+      <button class="pure-button" onclick="compute()">Compute</button>
+    </div>
+
+    <div style="min-height:100px"></div>
+
+<!--[if gt IE 8]><!--><script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script><!--<![endif]-->
+<script src="http://davist11.github.io/jQuery-One-Page-Nav/jquery.nav.js"></script>
+<script>
+  $(document).ready(function() {
+  console.log('calling onePageNav');
+  $('#nav').onePageNav();
+  });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script>
+
+//Width and height
+var width = 800;
+var height = 500;
+
+var svg = d3.select("#demoarea")
+              .append("svg")
+              .attr("width", width)
+              .attr("height", height);
+
+// Data for problem
+var box = [0,0,0,0]
+var planes = [100,100,100]
+
+// G object for background
+backgroundG = svg.append("g");
+
+// G objects for menu
+menuG = svg.append("g");
+menu2G = svg.append("g");
+
+// G objects for buttons
+buttonsPlusG = svg.append("g");
+buttonsMinusG = svg.append("g");
+
+// G object for buttontext
+buttontxtG = svg.append("g");
+
+backgroundG.append("rect")
+           .attr("x", 0).attr("y", 0)
+           .attr("width", width).attr("height", height)
+           .attr("fill", "rgb(255,250,205)");
+
+// Create menu and background
+menu = [];
+menuNum = 4;
+menuPad = 100;
+menuH = height/7;
+menuW = width/10;
+boxSize = [menuH/2, menuH/3, menuH/4, menuH/5];
+buttonSize = 30;
+
+for (var i = 0; i < menuNum; i++) {
+  menu.push([.8*width, i*(height - 2*menuPad)/(menuNum - 1) + menuPad]);
+}
+
+menuG.selectAll("rect")
+     .data(menu)
+     .enter()
+     .append("rect")
+     .attr("x", function(d) { return d[0]; })
+     .attr("y", function(d) { return d[1] - menuH/2; })
+     .attr("height", menuH )
+     .attr("width", menuW )
+     .attr("fill", "rgb(245,222,179)")
+     .attr("stroke", "rgb(225,202,149)")
+     .attr("stroke-width", 3);
+
+menu2G.selectAll("rect")
+     .data(menu)
+     .enter()
+     .append("rect")
+     .attr("x", function(d,i) { return d[0] + menuW/2 - boxSize[i]/2; })
+     .attr("y", function(d,i) { return d[1] - menuH/2 + (i+1)*menuH/10; })
+     .attr("height", function(d,i) { return boxSize[i]; } )
+     .attr("width", function(d,i) { return boxSize[i]; } )
+     .attr("fill", "rgb(225,202,149)")
+     .attr("stroke", "rgb(205,182,129)")
+     .attr("stroke-width", 3);
+
+buttonsPlusG.selectAll("rect")
+     .data(menu)
+     .enter()
+     .append("rect")
+     .attr("x", function(d) { return d[0] + menuW; })
+     .attr("y", function(d) { return d[1] - buttonSize/2; })
+     .attr("height", buttonSize )
+     .attr("width", buttonSize )
+     .attr("fill", "rgb(225,202,149)")
+     .attr("stroke", "rgb(205,182,129)")
+     .attr("stroke-width", 3)
+     .attr("id", function(d,i) { return i; })
+     .on("mousedown", addBox);
+
+buttonsPlusG.selectAll("text")
+     .data(menu)
+     .enter()
+     .append("text")
+     .attr("x", function(d) { return d[0] + menuW + buttonSize/2; })
+     .attr("y", function(d) { return d[1] + .35*buttonSize; })
+     .attr("fill", "rgb(0,220,0)")
+     .attr("stroke", "rgb(0,180,0)")
+     .text("+")
+     .attr("font-size", 30)
+     .attr("font-weight", 700)
+     .attr("text-anchor", "middle")
+     .attr("id", function(d,i) { return i; })
+     .on("mousedown", addBox);
+
+buttonsMinusG.selectAll("rect")
+     .data(menu)
+     .enter()
+     .append("rect")
+     .attr("x", function(d) { return d[0] - buttonSize; })
+     .attr("y", function(d) { return d[1] - buttonSize/2; })
+     .attr("height", buttonSize )
+     .attr("width", buttonSize )
+     .attr("fill", "rgb(225,202,149)")
+     .attr("stroke", "rgb(205,182,129)")
+     .attr("stroke-width", 3)
+     .attr("id", function(d,i) { return i; })
+     .on("mousedown", removeBox);
+
+buttonsMinusG.selectAll("text")
+     .data(menu)
+     .enter()
+     .append("text")
+     .attr("x", function(d) { return d[0] - buttonSize/2; })
+     .attr("y", function(d) { return d[1] + .35*buttonSize; })
+     .attr("fill", "rgb(220,0,0)")
+     .attr("stroke", "rgb(180,0,0)")
+     .text("-")
+     .attr("font-size", 30)
+     .attr("font-weight", 700)
+     .attr("text-anchor", "middle")
+     .attr("id", function(d,i) { return i; })
+     .on("mousedown", removeBox);
+
+redraw();
+
+function addBox() {
+  var id = parseInt(d3.select(this).attr("id"));
+  box[id] += 1;
+  redraw();
+}
+
+function removeBox() {
+  var id = parseInt(d3.select(this).attr("id"));
+  if (box[id] > 0) {
+    box[id] -= 1;
+  }
+  redraw();
+}
+
+function redraw() {
+  buttontxtG.selectAll("text").remove("text");
+  buttontxtG.selectAll("text")
+            .data(box)
+            .enter()
+            .append("text")
+            .attr("x", function(d,i) { return menu[i][0] + menuW/2; })
+            .attr("y", function(d,i) { return menu[i][1] + .4*menuH; })
+            .text(function(d) {return d;})
+            .attr("text-anchor", "middle")
+            .attr("font-family", "Helvetica Neue")
+            .attr("font-weight", 800)
+            .attr("font-size", 15)
+            .attr("fill", "white");
+}
+
+function compute() {
+  params = [a1, a2, b1, b2, c1, c2, d1, d2, nData];
+  console.log(params);
+  d3.json('/piecewiseLinear')
+    .header('Content-Type', 'application/json')
+    .post(JSON.stringify({'params': params}), serverResponse);
+}
+
+function serverResponse(error, data) {
+  console.log('serverResponse');
+  console.log('data', data);
+  if (!error) {
+    if ('solution' in data) {
+        // Import solution and put it into correct format
+        var solution = data['solution'];
+        console.log('solution', solution);
+        var solPoint = [solution, f(a1,a2,b1,b2,c1,c2,d1,d2,solution)];
+        solutionG.selectAll("circle").remove("circle");
+        solutionG.append("circle").attr("cx", xScale(solPoint[0]))
+                                  .attr("cy", yScale(solPoint[1]))
+                                  .attr("r", 5)
+                                  .attr("fill", "red");
+    }
+  }
+}
+
+</script>
