@@ -24,11 +24,9 @@
   </ul>
   <div id="example_container">
     <div class="example_section" id="intro">
-      <h1>Cargo Plane Loading</h1>
+      <h1>Cargo Aircraft Loading</h1>
         <subtitle>with integer programming and Gurobi</subtitle>
     </div>
-      <p> Less rich example</p>
-      <p> Could also be a makespan example </p>
 
       <p>
         In this example we'll solve a simple loading problem: how to
@@ -43,21 +41,90 @@
       </p>
 
       <p>
-        Although your own business may not involve loading cargo airplanes,
-        the same basic techniques used in this
-        example can be used for other applications in ?????.
+        Although your own business may not involve cargo airplanes,
+        the same basic techniques used in this example can be used for other
+        applications in scheduling and loading.
       </p>
 
     <div class="example_section" id="problem">
       <h2><a href="#problem" name="problem">Problem Description</a></h2>
       Problem description goes here
 
+      <div style="float:right;">
+          <img src="boeingdreamlifter.jpg" alt="Cargo Airplane" style="width:200px;">
+      </div>
+
+      <aside>A Boeing 747 Dreamlifter cargo aircraft. <span style="font-size: 10px">Source: <a href="https://commons.wikimedia.org/wiki/File:Boeing_747-400LCF_Dreamlifter.jpg">Altair78</a> - <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.en">CC BY-SA 3.0</a></span>
+      </aside>
+
     </div>
     <div class="example_section" id="model">
       <h2><a href="#model" name="model">Mathematical Model</a></h2>
 
-      <p>Model description goes here.</p>
-      <p> Example of multiprocessor scheduling or makespan</p>
+      <p>
+        Our example is an instance of the
+        <a href="http://www2.informatik.hu-berlin.de/alcox/lehre/lvws1011/coalg/makespan_scheduling.pdf">
+        makespan scheduling</a> (or load balancing) problem. Given a number of
+        machines and jobs, the makespan scheduling problem consists of
+        scheduling the jobs on the machines to minimize the maximum time
+        or <em>makespan</em> to complete all the jobs. We'll describe the
+        mathematical model for this business problem in terms of
+        cargo on an aircraft, but it's important to remember that the
+        techniques used here can be applied to a very large set of
+        business problems.
+      </p>
+
+      <p>
+        First, let us define a binary variable
+        \[
+        x_{ij} = \begin{cases} 1 & \text{if package $i$ is loaded onto aircraft $j$} \\
+                                        0 & \text{otherwise}.
+                          \end{cases}
+        \]
+      </p>
+
+      <p>
+        Let $P$ be the set of packages and $A$ the set of aircrafts. Every
+        box must be loaded onto an aircraft. So we have the following
+        constraint
+        \[
+        \sum_{j \in A} x_{ij} = 1 \quad \forall p \in P
+        \]
+      </p>
+
+      <p>
+        Let $w_{max}$ denote the maximum weight on the aircrafts and let
+        $w_i$ denote the weight of package $i$. $w_{max}$ is the quantity
+        we seek to minimize. However, we must transport all the freight,
+        so we have the following constraint for every aircraft
+        \[
+        \sum_{i \in P} w_i x_{ij} \leq w_{max} \quad \forall \in a \in A
+        \]
+      </p>
+
+      <p>
+        Cargo aircrafts can only carry limited weight, so we must also add
+        a constraint on the variable $w_max$
+        \[
+        w_{max} \leq c_{max}
+        \]
+        where $c_{max}$ denotes the maximum capacity of the aircrafts.
+      </p>
+
+      <p>
+        Our optimization model is then
+        \[
+        \begin{align*}
+        \text{minimize}   & \quad {\displaystyle w_{max} } \\
+        \text{subject to} & \quad \sum_{j \in A} x_{ij} = 1 \quad \forall p \in P \\
+                          & \quad \sum_{i \in P} w_i x_{ij} \leq w_{max} \quad \forall \in a \in A \\
+                          & \quad w_{max} \leq c_{max} \\
+                          & \quad x_{ij} \in \{ 0, 1 \}
+        \end{align*}
+        \]
+
+      </p>
+
     </div>
     <div class="example_section" id="implementation">
       <h2><a href="#implementation" name="implementation">Implementation</a></h2>
@@ -103,7 +170,7 @@ var svg = d3.select("#demoarea")
 
 // Data for problem
 var box = [5,4,10,15];
-var planes = [100,100,100]; //max weight in tonnes
+var planes = [70,70,70]; //max weight in tonnes
 var boxWeights = [6,4,3,2]; // in tonnes
 var boxes = [];
 var boxScale = 3.8;
