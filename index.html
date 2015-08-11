@@ -66,11 +66,27 @@
       </div>
 
       <p>
-        
+        An air freight company is shipping a large quantity of packages
+        across the Pacific. Three aircrafts have been made available and
+        the freight needs to be loaded onto these.
+      </p>
+
+      <p>
+        The weight of each package is known, and the company is now faced
+        with the problem of how to distribute the packages to minimize the
+        fuel consumption. Given two or more aircrafts, the most fuel
+        efficient distribution is the one that distributes the weight
+        <a href="https://en.wikipedia.org/wiki/Fuel_economy_in_aircraft#Factors_in_aircraft_fuel_economy">
+        most equally</a>.
       </p>
 
       <aside>A Boeing 747 Dreamlifter cargo aircraft. <span style="font-size: 10px">Source: <a href="https://commons.wikimedia.org/wiki/File:Boeing_747-400LCF_Dreamlifter.jpg">Altair78</a> - <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.en">CC BY-SA 3.0</a></span>
       </aside>
+
+      <p>
+        In other words, the problem reduces to finding the distribution of
+        packages which minimizes the maximum weight on any one of the planes.
+      </p>
 
     </div>
     <div class="example_section" id="model">
@@ -119,7 +135,7 @@
 
       <p>
         Cargo aircrafts can only carry limited weight, so we must also add
-        a constraint on the variable $w_max$
+        a constraint on the variable $w_{max}$
         \[
         w_{max} \leq c_{max}
         \]
