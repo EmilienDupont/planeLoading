@@ -163,7 +163,42 @@
         Gurobi's Python interface:
       </p>
       <examplecode>
-      Gurobi Code
+      from gurobipy import *
+
+      # Example data
+      # Capacity of each plane in tonnes
+      aircrafts = [70, 70, 70]
+      # Weight of each package in tonnes
+      packages = [5, 6, 6, 7, 10, 12, 12, 14,
+                  14, 14, 14, 18, 19, 20, 20]
+
+      m = Model()
+
+      numA = len(aircrafts)
+      numP = len(packages)
+
+      # Add variables
+      x = {}
+      for i in range(numP):
+          for j in range(numA):
+              x[(i,j)] = m.addVar(vtype=GRB.BINARY, name = "x" + str(i) + str(j))
+
+      wMax = m.addVar(lb = 0, vtype=GRB.CONTINUOUS, name = "maximum_weight")
+
+      m.update()
+
+      # Add constraints
+      for i in range(numP):
+          m.addConstr( quicksum( x[(i,j)] for j in range(numA)) == 1, name="c1_%d" % i)
+
+      for j in range(numA):
+          m.addConstr( quicksum( x[(i,j)]*packages[i] for i in range(numP)) <= wMax, name="c2_%d" % j)
+
+      m.addConstr( wMax <= min(planes), name="maxconstraint" )
+
+      m.setObjective(wMax, GRB.MINIMIZE)
+
+      m.optimize()
       </examplecode>
     </div>
     <div class="example_section" id="demo">

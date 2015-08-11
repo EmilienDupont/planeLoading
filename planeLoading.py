@@ -2,37 +2,33 @@
 
 from gurobipy import *
 
-planes = [100, 100, 100]
-boxes = [34, 6, 8, 17, 16, 5, 13, 21,
-        25, 31, 14, 13, 33, 9, 25, 25]
-
-def optimize(planes, boxes, output=False):
+def optimize(aircrafts, packages, output=False):
 
     m = Model()
 
-    numP = len(planes)
-    numB = len(boxes)
+    numA = len(aircrafts)
+    numP = len(packages)
 
     # Add variables
-    l = {}
-    for i in range(numB):
-        for j in range(numP):
-            l[(i,j)] = m.addVar(vtype=GRB.BINARY, name = "l" + str(i) + str(j))
+    x = {}
+    for i in range(numP):
+        for j in range(numA):
+            x[(i,j)] = m.addVar(vtype=GRB.BINARY, name = "x" + str(i) + str(j))
 
-    maxweight = m.addVar(lb = 0, vtype=GRB.CONTINUOUS, name = "maxweight")
+    wMax = m.addVar(lb = 0, vtype=GRB.CONTINUOUS, name = "maximum_weight")
 
     m.update()
 
     # Add constraints
-    for i in range(numB):
-        m.addConstr( quicksum( l[(i,j)] for j in range(numP)) == 1, name="c1_%d" % i)
+    for i in range(numP):
+        m.addConstr( quicksum( x[(i,j)] for j in range(numA)) == 1, name="c1_%d" % i)
 
-    for j in range(numP):
-        m.addConstr( quicksum( l[(i,j)]*boxes[i] for i in range(numB)) <= maxweight, name="c2_%d" % j)
+    for j in range(numA):
+        m.addConstr( quicksum( x[(i,j)]*packages[i] for i in range(numP)) <= wMax, name="c2_%d" % j)
 
-    m.addConstr( maxweight <= planes[0], name="maxconstraint" )
+    m.addConstr( wMax <= min(planes), name="maxconstraint" )
 
-    m.setObjective(maxweight, GRB.MINIMIZE)
+    m.setObjective(wMax, GRB.MINIMIZE)
 
     m.optimize()
 
@@ -41,10 +37,10 @@ def optimize(planes, boxes, output=False):
 
     solution = []
 
-    for j in range(numP):
+    for j in range(numA):
         row = []
-        for i in range(numB):
-            if l[(i,j)].X > .5:
+        for i in range(numP):
+            if x[(i,j)].X > .5:
                 row.append(i)
         solution.append(row)
 
