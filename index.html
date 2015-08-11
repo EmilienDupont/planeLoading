@@ -128,7 +128,7 @@
         seek to minimize) and let $w_i$ denote the weight of package $i$.
         In order to bound the total weight on each plane, we add the constraint
         \[
-        \sum_{i \in P} w_i x_{ij} \leq w_{max} \quad \forall \in a \in A
+        \sum_{i \in P} w_i x_{ij} \leq w_{max} \quad \forall a \in A
         \]
         where the left hand side is the total weight on aircraft $a$.
       </p>
@@ -207,6 +207,27 @@
       </div>
       <button class="pure-button" onclick="compute()">Compute</button>
 
+      <p>
+        <button class="pure-button" onclick="toggle_div()">Gurobi Log</button>
+      </p>
+
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+      <script>
+        function toggle_div() {
+          var logfile = d3.select('#logfile');
+          if (logfile.style("display") === "none") {
+            logfile.style("display", "block");
+          } else {
+            logfile.style("display", "none");
+          }
+
+        }
+      </script>
+
+      <examplecode id=logfile>
+      </examplecode>
+
     <div style="min-height:100px"></div>
 
 <!--[if gt IE 8]><!--><script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script><!--<![endif]-->
@@ -220,6 +241,9 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script>
+
+// Hide Log File intially
+d3.select('#logfile').style("display", "none");
 
 //Width and height
 var width = 800;
@@ -467,13 +491,23 @@ function serverResponse(error, data) {
   if (!error) {
     if ('solution' in data) {
         // Import solution
-        var solution = data['solution'];
+        var solutionTemp = data['solution'];
+        var solution = solutionTemp[0];
         console.log('solution', solution);
 
-        if (solution.length === 1) {
-          alert("Too much weight for 3 airplanes! Reduce the number of boxes.")
+        if (solution[0] === "infeasible") {
+          alert("Too much weight for 3 airplanes! Reduce the number of packages.")
           return;
         }
+
+        if (solution[0] === "error") {
+          alert("10 second time limit exceeded. Reduce the number of packages.")
+          return;
+        }
+
+        var logMsg = solutionTemp[1]; // Log message to display
+
+        d3.select('#logfile').html(logMsg);
 
         // Calculate total weight in each plane
         var weight = [0,0,0];

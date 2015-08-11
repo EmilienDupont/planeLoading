@@ -1,10 +1,20 @@
 #!/usr/bin/env python
 
 from gurobipy import *
+import StringIO
+
+def mycallback(model, where):
+    if where == GRB.callback.MESSAGE:
+        print >>model.__output, model.cbGet(GRB.callback.MSG_STRING),
 
 def optimize(aircrafts, packages, output=False):
 
     m = Model()
+
+    if not output:
+        m.params.OutputFlag = 0
+
+    m.setParam('TimeLimit', 10)
 
     numA = len(aircrafts)
     numP = len(packages)
@@ -26,14 +36,20 @@ def optimize(aircrafts, packages, output=False):
     for j in range(numA):
         m.addConstr( quicksum( x[(i,j)]*packages[i] for i in range(numP)) <= wMax, name="c2_%d" % j)
 
-    m.addConstr( wMax <= min(planes), name="maxconstraint" )
+    m.addConstr( wMax <= min(aircrafts), name="maxconstraint" )
 
     m.setObjective(wMax, GRB.MINIMIZE)
 
-    m.optimize()
+    output = StringIO.StringIO()
+    m.__output = output
+
+    m.optimize(mycallback)
 
     if (m.status == 3 or m.status == 4):
         return ["infeasible"]
+
+    if (m.status != 2):
+        return ["error"]
 
     solution = []
 
@@ -44,7 +60,7 @@ def optimize(aircrafts, packages, output=False):
                 row.append(i)
         solution.append(row)
 
-    return solution
+    return [solution, output.getvalue()]
 
 def handleoptimize(jsdict):
     if 'planes' in jsdict and 'boxes' in jsdict:
