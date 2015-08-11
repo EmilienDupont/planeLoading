@@ -13,6 +13,16 @@
 <link rel="stylesheet" href="http://examples.gurobi.com/base.css">
 <style>
 
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
 </style>
 <body>
   <ul id="nav">
@@ -30,8 +40,8 @@
 
       <p>
         In this example we'll solve a simple loading problem: how to
-        distribute the weight in cargo airplanes to minimize the
-        maximum weight in any one plane.
+        distribute the weight on cargo airplanes to minimize the
+        maximum weight on any one plane.
       </p>
 
       <p>
@@ -48,11 +58,16 @@
 
     <div class="example_section" id="problem">
       <h2><a href="#problem" name="problem">Problem Description</a></h2>
-      Problem description goes here
+
+
 
       <div style="float:right;">
           <img src="boeingdreamlifter.jpg" alt="Cargo Airplane" style="width:200px;">
       </div>
+
+      <p>
+        
+      </p>
 
       <aside>A Boeing 747 Dreamlifter cargo aircraft. <span style="font-size: 10px">Source: <a href="https://commons.wikimedia.org/wiki/File:Boeing_747-400LCF_Dreamlifter.jpg">Altair78</a> - <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.en">CC BY-SA 3.0</a></span>
       </aside>
@@ -93,13 +108,13 @@
       </p>
 
       <p>
-        Let $w_{max}$ denote the maximum weight on the aircrafts and let
-        $w_i$ denote the weight of package $i$. $w_{max}$ is the quantity
-        we seek to minimize. However, we must transport all the freight,
-        so we have the following constraint for every aircraft
+        Let $w_{max}$ denote the largest weight on the aircrafts (which we
+        seek to minimize) and let $w_i$ denote the weight of package $i$.
+        In order to bound the total weight on each plane, we add the constraint
         \[
         \sum_{i \in P} w_i x_{ij} \leq w_{max} \quad \forall \in a \in A
         \]
+        where the left hand side is the total weight on aircraft $a$.
       </p>
 
       <p>
@@ -140,10 +155,6 @@
       <div id="demoarea">
       </div>
       <button class="pure-button" onclick="compute()">Compute</button>
-      <div>Airplane icons made by <a href="http://www.flaticon.com/authors/google" title="Google">Google</a>
-      from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>
-      is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a></div>
-    </div>
 
     <div style="min-height:100px"></div>
 
@@ -189,6 +200,10 @@ menu2G = svg.append("g");
 buttonsPlusG = svg.append("g");
 buttonsMinusG = svg.append("g");
 
+// G objects for clickable part of buttons
+clickablePlusG = svg.append("g");
+clickableMinusG = svg.append("g");
+
 // G object for buttontext
 buttontxtG = svg.append("g");
 
@@ -206,19 +221,7 @@ backgroundG.append("rect")
            .attr("x", 0).attr("y", 0)
            .attr("width", width).attr("height", height)
            .attr("fill", "rgb(255,250,205)");
-/*
-var planeGraphics = [[0, .65*height], [.19*width, .8*height], [.38*width, .95*height]];
 
-planesG.selectAll("path")
-          .data(planeGraphics)
-          .enter()
-          .append("path")
-          .attr("d", "M510,255c0-20.4-17.85-38.25-38.25-38.25H331.5L204,12.75h-51l63.75,204H76.5l-38.25-51H0L25.5,255L0,344.25h38.25    l38.25-51h140.25l-63.75,204h51l127.5-204h140.25C492.15,293.25,510,275.4,510,255z")
-          .attr("transform", function(d) { return "translate(" + d[0] + "," + d[1] + ") rotate(-90) scale(.6)"; })
-          .attr("fill", "white")
-          .attr("stroke", "black")
-          .attr("opacity", .5);
-*/
 // Create menu
 menu = [];
 menuNum = 4;
@@ -266,9 +269,7 @@ buttonsPlusG.selectAll("rect")
      .attr("width", buttonSize )
      .attr("fill", "rgb(225,202,149)")
      .attr("stroke", "rgb(205,182,129)")
-     .attr("stroke-width", 3)
-     .attr("id", function(d,i) { return i; })
-     .on("mousedown", addBox);
+     .attr("stroke-width", 3);
 
 buttonsPlusG.selectAll("text")
      .data(menu)
@@ -281,9 +282,22 @@ buttonsPlusG.selectAll("text")
      .text("+")
      .attr("font-size", 30)
      .attr("font-weight", 700)
-     .attr("text-anchor", "middle")
+     .attr("text-anchor", "middle");
+
+clickablePlusG.selectAll("rect")
+     .data(menu)
+     .enter()
+     .append("rect")
+     .attr("x", function(d) { return d[0] + menuW; })
+     .attr("y", function(d) { return d[1] - buttonSize/2; })
+     .attr("height", buttonSize )
+     .attr("width", buttonSize )
+     .attr("fill", "black")
+     .attr("opacity", 0)
      .attr("id", function(d,i) { return i; })
-     .on("mousedown", addBox);
+     .on("mousedown", addBox)
+     .on("mouseover", buttonhover)
+     .on("mouseout", buttonstop);
 
 buttonsMinusG.selectAll("rect")
      .data(menu)
@@ -295,9 +309,7 @@ buttonsMinusG.selectAll("rect")
      .attr("width", buttonSize )
      .attr("fill", "rgb(225,202,149)")
      .attr("stroke", "rgb(205,182,129)")
-     .attr("stroke-width", 3)
-     .attr("id", function(d,i) { return i; })
-     .on("mousedown", removeBox);
+     .attr("stroke-width", 3);
 
 buttonsMinusG.selectAll("text")
      .data(menu)
@@ -310,9 +322,22 @@ buttonsMinusG.selectAll("text")
      .text("-")
      .attr("font-size", 30)
      .attr("font-weight", 700)
-     .attr("text-anchor", "middle")
+     .attr("text-anchor", "middle");
+
+clickableMinusG.selectAll("rect")
+     .data(menu)
+     .enter()
+     .append("rect")
+     .attr("x", function(d) { return d[0] - buttonSize; })
+     .attr("y", function(d) { return d[1] - buttonSize/2; })
+     .attr("height", buttonSize )
+     .attr("width", buttonSize )
+     .attr("fill", "black")
+     .attr("opacity", 0)
      .attr("id", function(d,i) { return i; })
-     .on("mousedown", removeBox);
+     .on("mousedown", removeBox)
+     .on("mouseover", buttonhover)
+     .on("mouseout", buttonstop);
 
 redraw();
 
@@ -345,6 +370,14 @@ function removeBox() {
   redraw();
 }
 
+function buttonhover() {
+  d3.select(this).attr("opacity", .2);
+}
+
+function buttonstop() {
+  d3.select(this).attr("opacity", 0);
+}
+
 function redraw() {
   buttontxtG.selectAll("text").remove("text");
   buttontxtG.selectAll("text")
@@ -358,7 +391,8 @@ function redraw() {
             .attr("font-family", "Helvetica Neue")
             .attr("font-weight", 800)
             .attr("font-size", 15)
-            .attr("fill", "white");
+            .attr("fill", "white")
+            .attr("class", "noselect");
 }
 
 function compute() {
