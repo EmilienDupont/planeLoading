@@ -68,7 +68,7 @@
       <p>
         An air freight company is shipping a large quantity of packages
         across the Pacific. It has been determined that three aircrafts
-        are necessary to transport all the freight and the packages now
+        are necessary to transport all the freight, and the packages now
         need to be loaded onto the planes.
       </p>
 
@@ -206,9 +206,14 @@
       <h2><a href="#demo" name="demo">Live Demo</a></h2>
 
       <p>
-        Click on the "+" and "-" icons to add and remove boxes. The largest
-        packages have a weight of 6 tonnes, while the smallest have a weight
-        of 1 tonne.
+        Click on the "+" and "-" icons to add and remove boxes. The packages
+        have the following weights:
+        <ul>
+          <li>Large Box: 6 tonnes</li>
+          <li>Medium Box: 4 tonnes</li>
+          <li>Medium Small Box: 3 tonnes</li>
+          <li>Small Box: 2 tonnes</li>
+        </ul>
       </p>
       <p>
         The airplanes have a maximum capacity of 70 tonnes.
@@ -427,8 +432,6 @@ clickableMinusG.selectAll("rect")
      .on("mouseover", buttonhover)
      .on("mouseout", buttonstop);
 
-redraw();
-
 var storage = [[.1*width, .2*height], [.3*width, .2*height], [.5*width, .2*height]]
 var storageW = .15*width;
 var storageH = .6*height;
@@ -443,6 +446,8 @@ storageG.selectAll("rect")
         .attr("height", storageH)
         .attr("width", storageW)
         .attr("opacity", .3);
+
+redraw();
 
 function addBox() {
   var id = parseInt(d3.select(this).attr("id"));
@@ -466,6 +471,14 @@ function buttonstop() {
   d3.select(this).attr("opacity", 0);
 }
 
+function totalweight(boxN, boxW) {
+  var weightTot = 0;
+  for (var i = 0; i < boxN.length; i++) {
+    weightTot += boxN[i]*boxW[i];
+  }
+  return weightTot;
+}
+
 function redraw() {
   buttontxtG.selectAll("text").remove("text");
   buttontxtG.selectAll("text")
@@ -481,6 +494,17 @@ function redraw() {
             .attr("font-size", 15)
             .attr("fill", "black")
             .attr("class", "noselect");
+  backgroundG.selectAll("text").remove("text");
+  backgroundG.append("text")
+            .attr("x", storage[1][0] + storageW/2)
+            .attr("y", height/10)
+            .attr("text-anchor", "middle")
+            .attr("font-family", "Helvetica Neue")
+            .attr("font-weight", 800)
+            .attr("font-size", 24)
+            .attr("fill", "black")
+            .attr("class", "noselect")
+            .text("Total weight: " + String( totalweight(box, boxWeights) ) + " tonnes");
 }
 
 function compute() {
@@ -508,12 +532,12 @@ function serverResponse(error, data) {
         var solution = solutionTemp[0];
         console.log('solution', solution);
 
-        if (solution[0] === "infeasible") {
+        if (solution === "infeasible") {
           alert("Too much weight for 3 airplanes! Reduce the number of packages.")
           return;
         }
 
-        if (solution[0] === "error") {
+        if (solution === "error") {
           alert("10 second time limit exceeded. Reduce the number of packages.")
           return;
         }
@@ -555,7 +579,7 @@ function serverResponse(error, data) {
           planesG[j].append("text")
                  .attr("x", storage[j][0] + storageW/2)
                  .attr("y", .85*height)
-                 .text(weight[j]);
+                 .text(String(weight[j]) + "/70");
 
           planesG[j].append("text")
                  .attr("x", storage[j][0] + storageW/2)
