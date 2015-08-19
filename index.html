@@ -206,17 +206,11 @@
       <h2><a href="#demo" name="demo">Live Demo</a></h2>
 
       <p>
-        Click on the "+" and "-" icons to add and remove boxes. The packages
-        have the following weights:
-        <ul>
-          <li>Large Box: 6 tonnes</li>
-          <li>Medium Box: 4 tonnes</li>
-          <li>Medium Small Box: 3 tonnes</li>
-          <li>Small Box: 2 tonnes</li>
-        </ul>
+        Click on the "+" and "-" icons to add and remove boxes.
       </p>
       <p>
-        The airplanes have a maximum capacity of 70 tonnes.
+        The weight and a number of each type of package is shown and the airplanes
+        have a maximum capacity of 70 tonnes.
       </p>
       <p>
         Click "Compute" to use Gurobi to find the optimal box distribution.
@@ -321,7 +315,7 @@ menuNum = 4;
 menuPad = 100;
 menuH = height/7;
 menuW = width/10;
-boxSize = [menuH/2, menuH/3, menuH/4, menuH/5];
+boxSize = [.4*menuH, .31*menuH, .25*menuH, .2*menuH];
 buttonSize = 30;
 
 for (var i = 0; i < menuNum; i++) {
@@ -340,12 +334,25 @@ menuG.selectAll("rect")
      .attr("stroke", "rgb(190,190,190)")
      .attr("stroke-width", 3);
 
+menuG.selectAll("text")
+     .data(menu)
+     .enter()
+     .append("text")
+     .attr("x", function(d) { return d[0] + menuW/2; })
+     .attr("y", function(d) { return d[1] - .3*menuH; })
+     .text(function(d,i) { return boxWeights[i] + " Tonnes"; })
+     .attr("fill", "rgb(150,150,150)")
+     .attr("font-size", 15)
+     .attr("font-weight", 700)
+     .attr("text-anchor", "middle")
+     .attr("font-family", "Helvetica Neue");
+
 menu2G.selectAll("rect")
      .data(menu)
      .enter()
      .append("rect")
      .attr("x", function(d,i) { return d[0] + menuW/2 - boxSize[i]/2; })
-     .attr("y", function(d,i) { return d[1] - menuH/2 + (i+1)*menuH/10; })
+     .attr("y", function(d,i) { return d[1] - .3*menuH + (i+1)*menuH/17; })
      .attr("height", function(d,i) { return boxSize[i]; } )
      .attr("width", function(d,i) { return boxSize[i]; } )
      .attr("fill", "rgb(225,202,149)")
