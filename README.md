@@ -16,10 +16,3 @@ An example of using Gurobi to solve a loading problem
 
 4. Click "Compute" to load the planes.
 
-# Performing an optimization
-
-To just solve the model (without running a web server) do:
-
-```
-make test
-```
