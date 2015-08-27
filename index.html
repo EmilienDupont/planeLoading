@@ -523,7 +523,7 @@ function redraw() {
             .attr("font-size", 24)
             .attr("fill", "black")
             .attr("class", "noselect")
-            .text("Total weight: " + String( totalweight(box, boxWeights) ) + " tonnes");
+            .text("Total weight: " + String( totalweight(box, boxWeights) ) + "/210 tonnes");
 }
 
 function compute() {
@@ -552,7 +552,7 @@ function serverResponse(error, data) {
         console.log('solution', solution);
 
         if (solution === "infeasible") {
-          alert("Too much weight for 3 airplanes! Reduce the number of packages.")
+          alert("Problem infeasible for 3 airplanes! Change the number of packages.")
           return;
         }
 
