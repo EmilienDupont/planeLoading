@@ -97,7 +97,7 @@ a:hover.screenshot {
       </aside>
 
       <p>
-        In other words, the problem reduces to finding the distribution of
+        In other words, the problem is reduced to finding the distribution of
         packages which minimizes the maximum weight on any one of the planes.
       </p>
 
@@ -166,7 +166,7 @@ a:hover.screenshot {
                           & \quad x_{ij} \in \{ 0, 1 \}
         \end{align*}
         \]
-
+        in the variables $x_{ij}$ and $w_{max}$.
       </p>
 
     </div>
@@ -176,42 +176,42 @@ a:hover.screenshot {
         Gurobi's Python interface:
       </p>
       <examplecode>
-      from gurobipy import *
+from gurobipy import *
 
-      # Example data
-      # Capacity of each plane in tonnes
-      aircrafts = [70, 70, 70]
-      # Weight of each package in tonnes
-      packages = [5, 6, 6, 7, 10, 12, 12, 14,
-                  14, 14, 14, 18, 19, 20, 20]
+# Example data
+# Capacity of each plane in tonnes
+aircrafts = [70, 70, 70]
+# Weight of each package in tonnes
+packages = [5, 6, 6, 7, 10, 12, 12, 14,
+            14, 14, 14, 18, 19, 20, 20]
 
-      m = Model()
+m = Model()
 
-      numA = len(aircrafts)
-      numP = len(packages)
+numA = len(aircrafts)
+numP = len(packages)
 
-      # Add variables
-      x = {}
-      for i in range(numP):
-          for j in range(numA):
-              x[(i,j)] = m.addVar(vtype=GRB.BINARY, name = "x" + str(i) + str(j))
+# Add variables
+x = {}
+for i in range(numP):
+    for j in range(numA):
+        x[(i,j)] = m.addVar(vtype=GRB.BINARY, name = "x" + str(i) + str(j))
 
-      wMax = m.addVar(lb = 0, vtype=GRB.CONTINUOUS, name = "maximum_weight")
+wMax = m.addVar(lb = 0, vtype=GRB.CONTINUOUS, name = "maximum_weight")
 
-      m.update()
+m.update()
 
-      # Add constraints
-      for i in range(numP):
-          m.addConstr( quicksum( x[(i,j)] for j in range(numA)) == 1, name="c1_%d" % i)
+# Add constraints
+for i in range(numP):
+    m.addConstr( quicksum( x[(i,j)] for j in range(numA)) == 1, name="c1_%d" % i)
 
-      for j in range(numA):
-          m.addConstr( quicksum( x[(i,j)]*packages[i] for i in range(numP)) <= wMax, name="c2_%d" % j)
+for j in range(numA):
+    m.addConstr( quicksum( x[(i,j)]*packages[i] for i in range(numP)) <= wMax, name="c2_%d" % j)
 
-      m.addConstr( wMax <= min(planes), name="maxconstraint" )
+m.addConstr( wMax <= min(planes), name="maxconstraint" )
 
-      m.setObjective(wMax, GRB.MINIMIZE)
+m.setObjective(wMax, GRB.MINIMIZE)
 
-      m.optimize()
+m.optimize()
       </examplecode>
     </div>
     <div class="example_section" id="demo">
@@ -221,7 +221,7 @@ a:hover.screenshot {
         Click on the "+" and "-" icons to add and remove boxes.
       </p>
       <p>
-        The weight and a number of each type of package is shown and the airplanes
+        The weight and a number of each type of package is shown. The airplanes
         have a maximum capacity of 70 tonnes.
       </p>
       <p>
