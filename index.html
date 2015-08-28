@@ -207,7 +207,7 @@ for i in range(numP):
 for j in range(numA):
     m.addConstr( quicksum( x[(i,j)]*packages[i] for i in range(numP)) <= wMax, name="c2_%d" % j)
 
-m.addConstr( wMax <= min(planes), name="maxconstraint" )
+m.addConstr( wMax <= min(aircrafts), name="maxconstraint" )
 
 m.setObjective(wMax, GRB.MINIMIZE)
 
