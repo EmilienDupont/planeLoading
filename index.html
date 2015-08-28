@@ -132,7 +132,7 @@ a:hover.screenshot {
         box must be loaded onto an aircraft. So we have the following
         constraint
         \[
-        \sum_{j \in A} x_{ij} = 1 \quad \forall p \in P
+        \sum_{j \in A} x_{ij} = 1 \quad \forall i \in P
         \]
       </p>
 
@@ -141,7 +141,7 @@ a:hover.screenshot {
         seek to minimize) and let $w_i$ denote the weight of package $i$.
         In order to bound the total weight on each plane, we add the constraint
         \[
-        \sum_{i \in P} w_i x_{ij} \leq w_{max} \quad \forall a \in A
+        \sum_{i \in P} w_i x_{ij} \leq w_{max} \quad \forall j \in A
         \]
         where the left hand side is the total weight on aircraft $a$.
       </p>
@@ -160,8 +160,8 @@ a:hover.screenshot {
         \[
         \begin{align*}
         \text{minimize}   & \quad {\displaystyle w_{max} } \\
-        \text{subject to} & \quad \sum_{j \in A} x_{ij} = 1 \quad \forall p \in P \\
-                          & \quad \sum_{i \in P} w_i x_{ij} \leq w_{max} \quad \forall \in a \in A \\
+        \text{subject to} & \quad \sum_{j \in A} x_{ij} = 1 \quad \forall i \in P \\
+                          & \quad \sum_{i \in P} w_i x_{ij} \leq w_{max} \quad \forall j \in A \\
                           & \quad w_{max} \leq c_{max} \\
                           & \quad x_{ij} \in \{ 0, 1 \}
         \end{align*}
