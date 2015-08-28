@@ -537,7 +537,7 @@ function compute() {
 
   console.log('boxes',boxes);
 
-  d3.json('/planeLoading.py')
+  d3.json('planeLoading.py')
     .header('Content-Type', 'application/json')
     .post(JSON.stringify({'planes': planes, 'boxes': boxes}), serverResponse);
 }
