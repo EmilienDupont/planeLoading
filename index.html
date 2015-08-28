@@ -272,6 +272,7 @@ d3.select('#logfile').style("display", "none");
 //Width and height
 var width = 800;
 var height = 500;
+var colors = d3.scale.category10();
 
 var svg = d3.select("#demoarea")
               .append("svg")
@@ -367,8 +368,8 @@ menu2G.selectAll("rect")
      .attr("y", function(d,i) { return d[1] - .3*menuH + (i+1)*menuH/17; })
      .attr("height", function(d,i) { return boxSize[i]; } )
      .attr("width", function(d,i) { return boxSize[i]; } )
-     .attr("fill", "rgb(225,202,149)")
-     .attr("stroke", "rgb(205,182,129)")
+     .attr("fill", function(d,i) { return colors(i); })
+     .attr("stroke", function(d,i) { return d3.rgb(colors(i)).darker(); })
      .attr("stroke-width", 3);
 
 buttonsPlusG.selectAll("rect")
@@ -584,8 +585,8 @@ function serverResponse(error, data) {
                  .attr("y", function(d,i) { return storage[j][1] - Math.floor(i/4)*storageH/10 + .95*storageH - boxScale*boxes[d]/2; })
                  .attr("height", function(d) { return boxScale*boxes[d];})
                  .attr("width", function(d) { return boxScale*boxes[d];})
-                 .attr("fill", "rgb(225,202,149)")
-                 .attr("stroke", "rgb(205,182,129)")
+                 .attr("fill", function(d) { var idx = boxWeights.indexOf(boxes[d]); return colors(idx); })
+                 .attr("stroke", function(d) { var idx = boxWeights.indexOf(boxes[d]); return d3.rgb(colors(idx)).darker(); })
                  .attr("stroke-width", 3)
                  .attr("opacity", 0)
                  .transition()
